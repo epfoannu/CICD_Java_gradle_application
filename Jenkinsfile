@@ -1,6 +1,6 @@
 pipeline{
     agent any
-    environment {
+    environment{
         VERSION = "${env.BUILD_ID}"
     }
     stages{
@@ -26,19 +26,19 @@ pipeline{
             steps{
                 script{
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'nexus_creds')]) {
-                        sh '''
-                                docker build -t 192.168.139.150:8083/springapp:${VERSION} .
-                                docker login -u admin -p $nexus_creds 192.168.139.150:8083 
-                                docker push  192.168.139.150:8083/springapp:${VERSION}
-                                docker rmi 192.168.139.150:8083/springapp:${VERSION}
-                            '''
-
-}
+                    sh '''
+                    docker build -t 192.168.139.150:8083/springapp:${VERSION} .
+                    docker login -u admin -p $nexus_creds 192.168.139.150:8083 
+                    docker push  192.168.139.150:8083/springapp:${VERSION}
+                    docker rmi 192.168.139.150:8083/springapp:${VERSION}
+                    '''
+                    }
+                }
                 }
             }
         }
 }
-}
+
 
 
 
