@@ -27,10 +27,10 @@ pipeline{
                 script{
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'nexus_creds')]) {
                         sh '''
-                                docker build -t 34.125.214.226:8083/springapp:${VERSION} .
-                                docker login -u admin -p $nexus_creds 34.125.214.226:8083 
-                                docker push  34.125.214.226:8083/springapp:${VERSION}
-                                docker rmi 34.125.214.226:8083/springapp:${VERSION}
+                                docker build -t 192.168.139.150:8083/springapp:${VERSION} .
+                                docker login -u admin -p $nexus_creds 192.168.139.150:8083 
+                                docker push  192.168.139.150:8083/springapp:${VERSION}
+                                docker rmi 192.168.139.150:8083/springapp:${VERSION}
                             '''
 
 }
