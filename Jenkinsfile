@@ -59,6 +59,16 @@ pipeline{
                     curl -u admin:$nexus_creds http://192.168.139.150:8081/repository/helm-repo/ --upload-file myapp-${helmversion}.tgz -v
                     '''
         }
+        stage('manual approval'){
+            steps{
+                script{
+                    timeout(10) {
+                        mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> Go to build url and approve the deployment request <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";  
+                        input(id: "Deploy Gate", message: "Deploy ${params.project_name}?", ok: 'Deploy')
+                    }
+                }
+            }
+        }
         stage('Deploying application on k8s cluster') {
             steps {
                script{
@@ -66,7 +76,19 @@ pipeline{
                    dir('kubernetes/') {
                    sh 'helm upgrade --install --set image.repository="192.168.139.150:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/ '     
         }
-    }
+        stage('verifying app deployment'){
+            steps{
+                script{
+                     withCredentials([file(credentialsId: 'k8s_credentials', variable: 'kubeconfig')]) {
+                         sh 'kubectl run curl --image=curlimages/curl -i --rm --restart=Never -- curl myjavaapp-myapp:8080'
+                     }
+                }
+            }
+        }
+
+     post {
+		always {
+			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";      
 }
             }
         }
@@ -76,6 +98,10 @@ pipeline{
 }
     }
 }
+        }
+    }
+}
+
 
 
 
