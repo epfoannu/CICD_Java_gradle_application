@@ -44,8 +44,6 @@ pipeline{
                         sh 'helm datree test .'
                 }
             }
-        }
-        
         stage('Pushing the helm charts to nexus repo'){
             steps{
                 script{
@@ -56,21 +54,25 @@ pipeline{
                                  tar -czvf  myapp-${helmversion}.tgz myapp/
                                  curl -u admin:$nexus_creds http://192.168.139.150:8081/repository/helm-repo/ --upload-file myapp-${helmversion}.tgz -v
                                 '''
+                         }
+                    }
                 }
             }
         }
-            }
-        }
-            
-            
+
+      
         post {
             always {
                 mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";  
-		 }
-	   }
+            }
         }
-    }
-}
+                }
+            }
+            
+		 
+	   
+       
+    
 }
 
     
