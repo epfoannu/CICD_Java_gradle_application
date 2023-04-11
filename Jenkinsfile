@@ -59,9 +59,6 @@ pipeline{
                     curl -u admin:$nexus_creds http://192.168.139.150:8081/repository/helm-repo/ --upload-file myapp-${helmversion}.tgz -v
                     '''
         }
-    }
-}
-        
         stage('Deploying application on k8s cluster') {
             steps {
                script{
@@ -77,6 +74,9 @@ pipeline{
         }
     }
 }
+    }
+}
+
 
 
 
