@@ -44,7 +44,7 @@ pipeline{
                         sh 'helm datree test .'
                 }
             }
-        }
+                }
                 
         stage('Pushing the helm charts to nexus repo'){
             steps{
