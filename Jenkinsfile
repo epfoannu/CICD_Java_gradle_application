@@ -10,9 +10,8 @@ pipeline {
             steps {
                 sh 'echo passed'
                 //git branch: 'devops', url: 'https://github.com/epfoannu/CICD_Java_gradle_application.git'
-      }
-    }
-    stages{
+            }
+        }
         stage('sonar quality status'){
             steps{
                 script{
@@ -24,7 +23,11 @@ pipeline {
             }
         }
     }
-    }
+    
+
+      
+    
+        
 }
 
 
