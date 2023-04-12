@@ -5,6 +5,10 @@ pipeline {
             args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemonargs '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
         }
     }
+    environment{
+        VERSION = "${env.BUILD_ID}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -23,12 +27,13 @@ pipeline {
             }
         }
     }
-    
+}
+
 
       
     
         
-}
+
 
 
 
