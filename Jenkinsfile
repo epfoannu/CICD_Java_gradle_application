@@ -1,63 +1,72 @@
 pipeline{
-    agent any
+    agent any 
     environment{
         VERSION = "${env.BUILD_ID}"
     }
     stages{
-        stage('sonar quality status'){
+        stage("sonar quality check"){
+            agent {
+                docker {
+                    image 'openjdk:11'
+                }
+            }
             steps{
                 script{
                     withSonarQubeEnv(credentialsId: 'sonar-token') {
-                        sh 'chmod +x gradlew'
-                        sh './gradlew sonarqube'
+                            sh 'chmod +x gradlew'
+                            sh './gradlew sonarqube'
                     }
-                }
 
-                }
+                    timeout(time: 1, unit: 'HOURS') {
+                      def qg = waitForQualityGate()
+                      if (qg.status != 'OK') {
+                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                      }
+                    }
+
+                }  
             }
-            
-        stage('Quality Gate Status'){
-            steps{
-                script{
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
-                }
-            }
-        stage('docker build & docker push to nexus repo'){
+        }
+        stage("docker build & docker push"){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'nexus_passwd', variable: 'nexus_creds')]) {
-                    sh '''
-                    docker build -t 192.168.139.150:8083/springapp:${VERSION} .
-                    docker login -u admin -p $nexus_creds 192.168.139.150:8083 
-                    docker push  192.168.139.150:8083/springapp:${VERSION}
-                    docker rmi 192.168.139.150:8083/springapp:${VERSION}
-                    '''
+                             sh '''
+                                docker build -t 192.168.139.150:8083/springapp:${VERSION} .
+                                docker login -u admin -p $nexus_creds 192.168.139.150:8083 
+                                docker push  192.168.139.150:8083/springapp:${VERSION}
+                                docker rmi 192.168.139.150:8083/springapp:${VERSION}
+                            '''
                     }
-                }
-                
-            }
-        stage('Identifying misconfigs using datree in helm charts'){
-            steps{
-                script{
-                    dir('kubernetes/myapp/') {
-                        withEnv(['DATREE_TOKEN=7d23b613-241b-444f-92dd-33d9ec2c9d40']) {
-                        sh 'helm datree test .'
                 }
             }
         }
-            
-        
+        stage('indentifying misconfigs using datree in helm charts'){
+            steps{
+                script{
 
-        stage('Pushing the helm charts to nexus repo'){
+                    dir('kubernetes/') {
+                        withEnv(['DATREE_TOKEN=7d23b613-241b-444f-92dd-33d9ec2c9d40']) {
+                              sh 'helm datree test myapp/'
+                        }
+                    }
+                }
+            }
+        }
+        stage("pushing the helm charts to nexus"){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'nexus_passwd', variable: 'nexus_creds')]) {
-                    dir('kubernetes/') {
-                    sh '''
-                    helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
-                    tar -czvf  myapp-${helmversion}.tgz myapp/
-                    curl -u admin:$nexus_creds http://192.168.139.150:8081/repository/helm-repo/ --upload-file myapp-${helmversion}.tgz -v
-                    '''
+                          dir('kubernetes/') {
+                             sh '''
+                                 helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
+                                 tar -czvf  myapp-${helmversion}.tgz myapp/
+                                 curl -u admin:$docker_password http://192.168.139.150:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
+                            '''
+                          }
+                    }
+                }
+            }
         }
 
         stage('manual approval'){
@@ -70,12 +79,17 @@ pipeline{
                 }
             }
         }
+
         stage('Deploying application on k8s cluster') {
             steps {
                script{
-                   withCredentials([file(credentialsId: 'kubeconf', variable: 'kubeconfig')]) {
-                   dir('kubernetes/') {
-                   sh 'helm upgrade --install --set image.repository="192.168.139.150:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/ '     
+                  withCredentials([file(credentialsId: 'kubeconf', variable: 'kubeconfig')]) {
+                        dir('kubernetes/') {
+                          sh 'helm upgrade --install --set image.repository="192.168.139.150:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/ ' 
+                        }
+                    }
+               }
+            }
         }
 
         stage('verifying app deployment'){
@@ -83,90 +97,16 @@ pipeline{
                 script{
                      withCredentials([file(credentialsId: 'kubeconf', variable: 'kubeconfig')]) {
                          sh 'kubectl run curl --image=curlimages/curl -i --rm --restart=Never -- curl myjavaapp-myapp:8080'
+
                      }
                 }
             }
         }
+    }
 
-     
-     post {
+    post {
 		always {
-			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";      
+			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";  
+		 }
+	   }
 }
-            }
-        }
-            }
-        }
-    }
-}
-    }
-}
-        }
-            }
-        }
-        }
-    }
-}
-}
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-                    
-            
-		 
-	   
-       
-    
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-       
-
-
-    
-
-
-                
-
-            
-    
-
-
-    
-                        
-
-                
-    
-
-
-             
-        
-        
-    
-
-
-
-
