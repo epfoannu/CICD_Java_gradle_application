@@ -4,11 +4,12 @@ pipeline{
         VERSION = "${env.BUILD_ID}"
     }
     stages{
-        steps{
-            script{
-                withSonarQubeEnv(credentialsId: 'sonar-token') {
-                    sh 'chmod +x gradlew'
-                    sh './gradlew sonarqube'
+        stage{
+            steps{
+                script{
+                    withSonarQubeEnv(credentialsId: 'sonar-token') {
+                        sh 'chmod +x gradlew'
+                        sh './gradlew sonarqube'
                     }
 
                     timeout(time: 1, unit: 'HOURS') {
@@ -103,4 +104,5 @@ pipeline{
 			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";  
 		 }
 	   }
+}
 
