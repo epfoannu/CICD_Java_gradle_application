@@ -12,8 +12,26 @@ pipeline {
                 //git branch: 'devops', url: 'https://github.com/epfoannu/CICD_Java_gradle_application.git'
       }
     }
+    stages{
+        stage('sonar quality status'){
+            steps{
+                script{
+                    withSonarQubeEnv(credentialsId: 'sonar-token') {
+                        sh 'chmod +x gradlew'
+                        sh './gradlew sonarqube'
+                    }
+                }
+            }
+        }
+    }
     }
 }
+
+
+
+
+
+    
 
       
 
