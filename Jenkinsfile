@@ -21,7 +21,6 @@ pipeline{
                     waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
-        }
         stage('docker build & docker push to nexus repo'){
             steps{
                 script{
@@ -107,6 +106,8 @@ pipeline{
         }
     }
 }
+}
+
 
 
 
