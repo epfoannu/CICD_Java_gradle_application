@@ -34,7 +34,7 @@ pipeline{
                     '''
                     }
                 }
-                }
+                
             }
         stage('Identifying misconfigs using datree in helm charts'){
             steps{
@@ -45,8 +45,8 @@ pipeline{
                 }
             }
         }
-            }
-        }
+            
+        
 
         stage('Pushing the helm charts to nexus repo'){
             steps{
@@ -59,6 +59,7 @@ pipeline{
                     curl -u admin:$nexus_creds http://192.168.139.150:8081/repository/helm-repo/ --upload-file myapp-${helmversion}.tgz -v
                     '''
         }
+
         stage('manual approval'){
             steps{
                 script{
@@ -76,6 +77,7 @@ pipeline{
                    dir('kubernetes/') {
                    sh 'helm upgrade --install --set image.repository="192.168.139.150:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/ '     
         }
+
         stage('verifying app deployment'){
             steps{
                 script{
@@ -86,6 +88,7 @@ pipeline{
             }
         }
 
+     
      post {
 		always {
 			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "epfoannu@gmail.com";      
@@ -99,8 +102,12 @@ pipeline{
     }
 }
         }
+            }
+        }
+        }
     }
 }
+
 
 
 
