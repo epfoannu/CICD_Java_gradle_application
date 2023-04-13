@@ -72,7 +72,6 @@ pipeline {
                     }
                 }
             }
-        }
         stage('manual approval'){
             steps{
                 script{
@@ -91,7 +90,6 @@ pipeline {
                    }
                 }
             }
-        }
         stage('verifying app deployment'){
             steps{
                 script{
