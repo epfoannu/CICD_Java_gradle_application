@@ -8,7 +8,6 @@ pipeline {
     environment{
         VERSION = "${env.BUILD_ID}"
     }
-
     stages {
         stage('Checkout') {
             steps {
