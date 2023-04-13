@@ -82,7 +82,6 @@ pipeline {
                     }
                 }
             }
-        }
         stage('Deploying application on k8s cluster') {
             steps {
                script{
