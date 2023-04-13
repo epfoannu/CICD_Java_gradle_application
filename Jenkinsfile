@@ -15,7 +15,6 @@ pipeline {
                 sh 'echo passed'
                 //git branch: 'devops', url: 'https://github.com/epfoannu/CICD_Java_gradle_application.git'
             }
-        }
         stage('sonar quality status'){
             steps{
                 script{
@@ -25,14 +24,12 @@ pipeline {
                     }
                 }
             }
-        }
         stage('Quality Gate Status'){
             steps{
                 script{
                     waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
-        }
         stage('docker build & docker push to nexus repo'){
             steps{
                 script{
@@ -111,6 +108,10 @@ pipeline {
 }
 }
 }
+        }
+    }
+}
+
 
 
 
