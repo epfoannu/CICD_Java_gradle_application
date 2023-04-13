@@ -34,8 +34,11 @@ pipeline {
             }
         }
         stage('Initialize'){
-        def dockerHome = tool 'myDocker'
-        env.PATH = "${dockerHome}/bin:${env.PATH}"
+            steps{
+                script{
+                    def dockerHome = tool 'myDocker'
+                    env.PATH = "${dockerHome}/bin:${env.PATH}"
+            }
         }
         stage('docker build & docker push to nexus repo'){
             steps{
@@ -53,6 +56,9 @@ pipeline {
         }
     }
 }
+}
+
+
 
     
 
