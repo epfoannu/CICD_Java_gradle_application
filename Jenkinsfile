@@ -18,7 +18,7 @@ pipeline {
         stage('sonar quality status'){
             steps{
                 script{
-                    withSonarQubeEnv(credentialsId: 'sonar-token') {
+                    withSonarQubeEnv(credentialsId: 'sonar_token') {
                         sh 'chmod +x gradlew'
                         sh './gradlew sonarqube'
                     }
@@ -28,10 +28,26 @@ pipeline {
         stage('Quality Gate Status'){
             steps{
                 script{
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_token'
+                }
+            }
+        }
+        stage('docker build & docker push to nexus repo'){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'nexus_credentials', variable: 'nexus_creds')]) {
+                        sh '''
+                        docker build -t 192.168.139.150:8083/springapp:${VERSION} .
+                        docker login -u admin -p $nexus_creds 192.168.139.150:8083
+                        docker push  192.168.139.150:8083/springapp:${VERSION}
+                        docker rmi 192.168.139.150:8083/springapp:${VERSION}
+                        '''
+                    }
                 }
             }
         }
     }
 }
+  
+
 
