@@ -35,7 +35,8 @@ pipeline {
         stage('docker build & docker push to nexus repo'){
             steps{
                 script{
-                    nexusArtifactUploader credentialsId: 'in.annu', groupId: 'in.annu', nexusUrl: '192.168.139.149:9000', nexusVersion: 'nexus3', protocol: 'http', repository: 'docker-hosted', version: 'snapshot-1.0'
+                    nexusArtifactUploader credentialsId: 'in.annu', groupId: 'in.annu', nexusUrl: '192.168.139.150', nexusVersion: 'nexus3', protocol: 'http', repository: 'docker-hosted', version: 'snapshot-1.0'
+                    
                         
                     }
                 }
