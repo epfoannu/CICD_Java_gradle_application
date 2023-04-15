@@ -35,14 +35,20 @@ pipeline {
         stage('docker build & docker push to nexus repo'){
             steps{
                 script{
-                    nexusArtifactUploader credentialsId: 'in.annu', groupId: 'in.annu', nexusUrl: '192.168.139.150', nexusVersion: 'nexus3', protocol: 'http', repository: 'docker-hosted', version: 'snapshot-1.0'
-                    
-                        
+                    withCredentials([string(credentialsId: 'nexus_credentials', variable: 'nexus_pass')]) {
+                    sh '''
+                    docker build -t 192.168.139.150:8083/springapp:${VERSION} .
+                    docker login -u admin -p $nexus_pass 192.168.139.150:8083
+                    docker push  192.168.139.150:8083/springapp:${VERSION}
+                    docker rmi 192.168.139.150:8083/springapp:${VERSION}
+                    '''
                     }
                 }
             }
         }
     }
+}
+
 
   
 
